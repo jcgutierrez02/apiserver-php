@@ -18,18 +18,18 @@ if ($method == "OPTIONS") {
 }
 
 
-$json = file_get_contents('php://input'); // RECIBE EL DATO JSON DE ANGULAR
+$json = file_get_contents('php://input'); // RECIBE EL DATO JSON DESDE UN CLIENTE (JavaScript, Angular, React, etc.)
 
 $params = json_decode($json); // DECODIFICA EL JSON Y LO GUARDA EN UNA VARIABLE
 
 
-// ESTABLECE CONEXION CON UNA NUEVA INSTANCIA
+// CREA UNA INSTANCIA DE CONEXIÓN A LA BD
 $pdo = new Conexion();
 
-// OBTENER TODOS LOS DATOS Y OBTENER UN SOLO DATO CUANDO HAYA UN ID POR PARAMETRO
+// OBTENER TODOS LOS DATOS Y OBTENER UN SÓLO DATO CUANDO HAYA UN ID POR PARÁMETRO
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     
-    if (isset($_GET['id'])) {
+    if (isset($_GET['id'])) {   // EL ID SE ENVÍA COMO PARÁMETRO EN LA URL
 
        $sql = $pdo -> prepare("SELECT * FROM contactosdb WHERE id = :id");
        $sql-> bindValue(':id', $_GET['id']);
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
        exit;
         
     }
-    else {
+    else {  // NO HAY ID COMO PARÁMETRO EN LA URL. OBTENER TODOS LOS DATOS
 
         $sql = $pdo -> prepare("SELECT * FROM contactosdb");
         $sql ->execute();
@@ -58,7 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-    $sql = "INSERT INTO contactosdb (nombre, telefono, email, imagen) VALUES (:nombre, :telefono, :email,:imagen)";
+    $sql = "INSERT INTO contactosdb (nombre, telefono, email, imagen) 
+                        VALUES (:nombre, :telefono, :email,:imagen)";
     $stmt = $pdo-> prepare($sql);
     $stmt -> bindValue(':nombre', $params->nombre);
     $stmt -> bindValue(':telefono', $params->telefono);
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 }
 
-// ACTUALIZAR REGISTRO
+// MODIFICAR REGISTRO
 
 if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
 
