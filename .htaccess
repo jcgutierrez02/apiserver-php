@@ -1,13 +1,19 @@
-Options All -Indexes
-Options -MultiViews
+Options +FollowSymLinks
+RewriteEngine on
 
-RewriteEngine On
+# Sintaxis
+# RewriteRule ^url-amigable$ url-no-amigable.php?parametro=$1
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.php [QSA,L]
+# «^» es el inicio de una expresión regular para definir el patrón de URL amigable
+# «producto» es una serie de caracteres que figurarán en toda URL que se desee redirigir.
+# «/» hay un separador de barra 
+# «([0-9]+)» es un patrón que indica que una repetición de 1 o más digitos.
+# «$» es el final del patrón.
 
+# El $1 es un parámetro que se corresponde con el patrón [0-9]+
 
-
-<IfModule mod_headers.c>
-Header set Access-Control-Allow-Origin "*"
-</IfModule>
+RewriteRule ^empleado/([0-9]+)$ index.php?id=$1
+RewriteRule ^empleados$ index.php
+RewriteRule ^empleado$ index.php
+RewriteRule ^empleadom/([0-9]+)$ index.php?id=$1
+RewriteRule ^empleadod/([0-9]+)$ index.php?id=$1

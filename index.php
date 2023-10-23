@@ -31,24 +31,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     
     if (isset($_GET['id'])) {   // EL ID SE ENVÍA COMO PARÁMETRO EN LA URL
 
-       $sql = $pdo -> prepare("SELECT * FROM contactosdb WHERE id = :id");
-       $sql-> bindValue(':id', $_GET['id']);
-       $sql ->execute();
-       $sql->setFetchMode(PDO::FETCH_ASSOC);
+        $sql = $pdo->prepare("SELECT * FROM contactosdb WHERE id = :id");
+        $sql->bindValue(':id', $_GET['id']);
+        $sql->execute();
+        $sql->setFetchMode(PDO::FETCH_ASSOC);
+        $datos = $sql->fetchAll();
 
-       header("HTTP/1.1 200 OK");
-       echo json_encode($sql-> fetchAll());
-       exit;
+        if ( count($datos) > 0 ) {  // El registro existe
+           header("HTTP/1.1 200 OK");
+           echo json_encode($datos);
+        }   
+        else {
+            header("HTTP/1.1 404 Not Found");
+            echo json_encode('El registro solicitado no existe');
+        }   
+       
+        exit;
         
     }
     else {  // NO HAY ID COMO PARÁMETRO EN LA URL. OBTENER TODOS LOS DATOS
 
-        $sql = $pdo -> prepare("SELECT * FROM contactosdb");
-        $sql ->execute();
+        $sql = $pdo->prepare("SELECT * FROM contactosdb");
+        $sql->execute();
         $sql->setFetchMode(PDO::FETCH_ASSOC);
-
+        
         header("HTTP/1.1 200 OK");
-        echo json_encode($sql-> fetchAll());
+        echo json_encode($sql->fetchAll());
+        
         exit;
     }
 
@@ -60,13 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $sql = "INSERT INTO contactosdb (nombre, telefono, email, imagen) 
                         VALUES (:nombre, :telefono, :email,:imagen)";
-    $stmt = $pdo-> prepare($sql);
-    $stmt -> bindValue(':nombre', $params->nombre);
-    $stmt -> bindValue(':telefono', $params->telefono);
-    $stmt -> bindValue(':email', $params->email);
-    $stmt -> bindValue(':imagen', $params->imagen);
-    $stmt -> execute();
-    $idPost = $pdo -> lastInsertId();
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':nombre', $params->nombre);
+    $stmt->bindValue(':telefono', $params->telefono);
+    $stmt->bindValue(':email', $params->email);
+    $stmt->bindValue(':imagen', $params->imagen);
+    $stmt->execute();
+    $idPost = $pdo->lastInsertId();
 
     if ( $idPost ) {
         header("HTTP/1.1 200 OK");
@@ -82,16 +91,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
 
     $sql = "UPDATE contactosdb SET nombre=:nombre, telefono=:telefono, email=:email, 
                 imagen=:imagen WHERE id=:id";
-    $stmt = $pdo -> prepare($sql);
-    $stmt -> bindValue(':nombre',$params->nombre);
-    $stmt -> bindValue(':telefono',$params->telefono);
-    $stmt -> bindValue(':email',$params->email);
-    $stmt -> bindValue(':imagen',$params->imagen);
-    $stmt -> bindValue(':id', $_GET['id']);
-    $stmt -> execute();
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':nombre',$params->nombre);
+    $stmt->bindValue(':telefono',$params->telefono);
+    $stmt->bindValue(':email',$params->email);
+    $stmt->bindValue(':imagen',$params->imagen);
+    $stmt->bindValue(':id', $_GET['id']);
+    $stmt->execute();
 
-    header("HTTP/1.1 200 OK");
-    echo json_encode('El registro se actualizó correctamente');
+    if($stmt->rowCount() > 0) {
+        header("HTTP/1.1 200 OK");
+        echo json_encode('El registro se actualizó correctamente');
+    }
+    else {
+        header("HTTP/1.1 404 Not Found");
+        echo json_encode('El registro solicitado no existe');
+    }    
     exit;
 }
 
@@ -100,12 +115,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
 if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
 
     $sql = "DELETE FROM contactosdb WHERE id=:id";
-    $stmt = $pdo -> prepare($sql);
-    $stmt -> bindValue(':id', $_GET['id']);
-    $stmt -> execute();
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id', $_GET['id']);
+    $stmt->execute();
     
-    header("HTTP/1.1 200 OK");
-    echo json_encode('El registro se eliminó correctamente');
+    if($stmt->rowCount() > 0) {
+        header("HTTP/1.1 200 OK");
+        echo json_encode('El registro se eliminó correctamente');
+    }    
+    else {
+        header("HTTP/1.1 404 Not Found");
+        echo json_encode('El registro solicitado no existe');
+    }    
     exit;
 }
 
